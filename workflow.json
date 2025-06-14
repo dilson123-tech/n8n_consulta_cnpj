@@ -1,0 +1,197 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "url": "=https://publica.cnpj.ws/cnpj/{{ $json[\"cnpj\"] }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -120,
+        -40
+      ],
+      "id": "bf5be474-d714-4d46-a29b-fb75feb13029",
+      "name": "HTTP consulta cnpj"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "f15a0c00-5a11-4101-9be4-8acb47912eb9",
+              "leftValue": "={{ $json[\"razao_social\"] }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        60,
+        -40
+      ],
+      "id": "aa5d4690-9770-4ae0-b734-9671ba64227e",
+      "name": "If- verifica cnpj valido"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "93c634f5-6c42-4ebc-9814-91a35a85745c",
+              "name": "=razao",
+              "value": "={{ $json[\"razao_social\"] }}",
+              "type": "string"
+            },
+            {
+              "id": "7660ebab-b8c9-468c-b123-c5d78d9e81aa",
+              "name": "=cnpj",
+              "value": "={{ $json[\"cnpj\"] }}",
+              "type": "string"
+            },
+            {
+              "id": "0d0c045b-8266-4705-8a72-fc20f32e0470",
+              "name": "=uf",
+              "value": "={{ $json[\"estabelecimento\"][\"estado\"][\"sigla\"] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        300,
+        -220
+      ],
+      "id": "d1080d8b-b59d-4563-8b3c-9db6b3d6c948",
+      "name": "dados ok"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "91bfccdf-de19-4ba2-94d4-4b3a5b8546ba",
+              "name": "erro",
+              "value": "CNPJ inválido ou não encontrado.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        280,
+        80
+      ],
+      "id": "0787ca62-afff-4e87-a03a-669c5c87c172",
+      "name": "dados invalidos"
+    },
+    {
+      "parameters": {
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        480,
+        -220
+      ],
+      "id": "8c319868-af94-4985-8727-367f2105c4b2",
+      "name": "resp. dados ok"
+    },
+    {
+      "parameters": {
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        480,
+        80
+      ],
+      "id": "a75cd831-10b4-4914-a2e3-5b33c15baa79",
+      "name": "Respond erro"
+    }
+  ],
+  "connections": {
+    "HTTP consulta cnpj": {
+      "main": [
+        [
+          {
+            "node": "If- verifica cnpj valido",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If- verifica cnpj valido": {
+      "main": [
+        [
+          {
+            "node": "dados ok",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "dados invalidos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "dados ok": {
+      "main": [
+        [
+          {
+            "node": "resp. dados ok",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "dados invalidos": {
+      "main": [
+        [
+          {
+            "node": "Respond erro",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "instanceId": "e8a2abd8f673051fec9e18b9fb74bcdcbb870bba8b9449c20414defd967f3da4"
+  }
+}
